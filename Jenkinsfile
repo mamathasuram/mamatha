@@ -1,56 +1,54 @@
 pipeline {
-    agent any
-    
+
+    parameters {
+        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+    } 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AKIAT7MEYHFRRK2UDXMI')
-        AWS_SECRET_ACCESS_KEY = credentials('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')
+        AWS_ACCESS_KEY_ID     = credentials('AKIAT7MEYHFRXQAHKWHZ')
+        AWS_SECRET_ACCESS_KEY = credentials('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')
     }
 
+   agent  any
     stages {
-        stage('Checkout') {
+        stage('checkout') {
             steps {
-                script {
-                    // Checkout your source code repository
-                    git 'https://github.com/mamathasuram/mamatha.git'
+                 script{
+                        dir("terraform")
+                        {
+                            git https://github.com/mamathasuram/mamatha.git
+                        }
+                    }
                 }
             }
-        }
 
-        stage('Terraform Init') {
+        stage('Plan') {
             steps {
-                script {
-                    // Initialize Terraform
-                    sh 'terraform init'
-                }
+                sh 'pwd;cd terraform/ ; terraform init'
+                sh "pwd;cd terraform/ ; terraform plan -out tfplan"
+                sh 'pwd;cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
             }
         }
+        stage('Approval') {
+           when {
+               not {
+                   equals expected: true, actual: params.autoApprove
+               }
+           }
 
-        stage('Terraform Plan') {
-            steps {
-                script {
-                    // Create a Terraform execution plan
-                    sh 'terraform plan -out=tfplan'
-                }
-            }
-        }
+           steps {
+               script {
+                    def plan = readFile 'terraform/tfplan.txt'
+                    input message: "Do you want to apply the plan?",
+                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+               }
+           }
+       }
 
-        stage('Terraform Apply') {
+        stage('Apply') {
             steps {
-                script {
-                    // Apply the Terraform plan
-                    sh 'terraform apply -auto-approve tfplan'
-                }
+                sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
             }
         }
     }
 
-    post {
-        always {
-            // Cleanup steps, such as destroying resources if needed
-            script {
-                // Destroy the Terraform resources (optional, use with caution)
-                // sh 'terraform destroy -auto-approve'
-            }
-        }
-    }
-}
+  }
