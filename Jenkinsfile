@@ -1,4 +1,4 @@
- pipeline {
+'" pipeline {
 
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
@@ -15,7 +15,7 @@
                  script{
                         dir("terraform")
                         {
-                            git https://github.com/mamathasuram/Terraform-Jenkins.git
+                            git "https://github.com/mamathasuram/Terraform-Jenkins.git"
                         }
                     }
                 }
