@@ -15,7 +15,7 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git https://github.com/mamathasuram/mamatha.git
+                            git "https://github.com/mamathasuram/mamatha.git"
                         }
                     }
                 }
