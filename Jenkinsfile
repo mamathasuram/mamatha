@@ -15,7 +15,7 @@
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/mamathasuram/Terraform-Jenkins.git"
+                            git "https://github.com/mamathasuram/mamatha.git"
                         }
                     }
                 }
